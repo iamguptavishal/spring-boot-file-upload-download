@@ -1,4 +1,4 @@
-package io.vishal.filedemo;
+package io.vishal.filedemo.exception;
 
 import io.vishal.filedemo.exception.ErrorResponse;
 import io.vishal.filedemo.exception.StorageException;
