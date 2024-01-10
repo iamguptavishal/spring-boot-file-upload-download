@@ -17,6 +17,12 @@ public class GlobalException {
         return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(FileStorageException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException e) {
+        return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private ResponseEntity<ErrorResponse> buildErrorResponse(Exception e, HttpStatus httpStatus) {
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), e.getMessage());
         return ResponseEntity.status(httpStatus).body(errorResponse);
