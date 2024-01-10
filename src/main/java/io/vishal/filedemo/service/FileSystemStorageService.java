@@ -1,5 +1,6 @@
 package io.vishal.filedemo.service;
 
+import io.vishal.filedemo.exception.FileNotFoundException;
 import io.vishal.filedemo.exception.FileStorageException;
 import io.vishal.filedemo.exception.StorageException;
 import io.vishal.filedemo.storage.StorageProperties;
@@ -7,11 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -36,8 +39,7 @@ public class FileSystemStorageService implements StorageService{
     }
 
     @Override
-    public void storeFile(MultipartFile file) {
-        log.info("storeFile started...");
+    public String storeFile(MultipartFile file) {
         try {
             if (Objects.isNull(file) || file.isEmpty()) {
                 throw new StorageException("Failed to store empty file.");
@@ -51,14 +53,27 @@ public class FileSystemStorageService implements StorageService{
             try (InputStream in = file.getInputStream()) {
                 Files.copy(in, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
+            return destinationFile.getFileName().toString();
         } catch (IOException e) {
             throw new FileStorageException("Unable to store file = "+file.getOriginalFilename() + "Please try again.");
         }
-        log.info("storeFile completed...");
     }
 
     @Override
-    public Resource loadFileAsResource() {
-        return null;
+    public Resource loadFileAsResource(String fileName) {
+        Resource resource;
+        log.info("loadFileAsResource :: "+fileName);
+        Path filePath = this.fileStorageLocation.resolve(fileName);
+        log.info("Resolved filePath = "+filePath);
+        try {
+            resource = new UrlResource(filePath.toUri());
+        } catch (MalformedURLException e) {
+            throw new FileNotFoundException("File not found = "+fileName);
+        }
+        if(resource.exists()) {
+            return resource;
+        } else {
+            throw new FileNotFoundException("File not found = "+fileName);
+        }
     }
 }

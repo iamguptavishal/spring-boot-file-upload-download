@@ -23,6 +23,12 @@ public class GlobalException {
         return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(FileNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ErrorResponse> handleFileNotFoundException(FileNotFoundException e) {
+        return buildErrorResponse(e, HttpStatus.NOT_FOUND);
+    }
+
     private ResponseEntity<ErrorResponse> buildErrorResponse(Exception e, HttpStatus httpStatus) {
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), e.getMessage());
         return ResponseEntity.status(httpStatus).body(errorResponse);
